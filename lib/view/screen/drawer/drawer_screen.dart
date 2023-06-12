@@ -28,10 +28,10 @@ class DrawerScreen extends StatelessWidget {
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddCategory(),
+                builder: (context) => const CategoryScreen(),
               ));
         },
-        leading: CircleAvatar(
+        leading: const CircleAvatar(
           maxRadius: 20,
           child: Center(
               child: Icon(
