@@ -3,7 +3,10 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
+import 'package:note_app/database/category_connection.dart';
+import 'package:note_app/database/note_connection.dart';
 import 'package:note_app/global/style/style_widget.dart';
+import 'package:note_app/model/category_model.dart';
 import 'package:note_app/model/note_model.dart';
 import 'package:note_app/view/screen/add_note.dart';
 import 'package:note_app/view/screen/drawer/drawer_screen.dart';
@@ -16,10 +19,26 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<NoteModel> notes = [];
+  getNote() async {
+    await NoteDB().getNote().then((value) {
+      setState(() {
+        notes = value;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    getNote();
     return Scaffold(
-      endDrawer: Drawer(
+      endDrawer: const Drawer(
         child: DrawerScreen(),
       ),
       appBar: AppBar(
@@ -27,8 +46,8 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('O.D Note'),
       ),
       body: ListView.builder(
-        itemCount: 4,
-        itemBuilder: (context, index) => buildNoteCard(),
+        itemCount: notes.length,
+        itemBuilder: (context, index) => buildNoteCard(note: notes[index]),
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -70,8 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('hello', style: noteTitle),
-                        Text('hello', style: notebody),
+                        Text(note!.title, style: noteTitle),
+                        Text(note.description, style: notebody),
                         Text(
                           DateFormat()
                               .add_yMMMd()
@@ -92,14 +111,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'hello',
+                          note.category,
                           style: noteCategory,
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: CircleAvatar(
                             maxRadius: 8,
-                            backgroundColor: HexColor('#2ebd73'),
+                            backgroundColor: HexColor(note.colorCode),
                           ),
                         )
                       ]),

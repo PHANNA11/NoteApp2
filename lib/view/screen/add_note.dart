@@ -2,10 +2,14 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:note_app/database/note_connection.dart';
 import 'package:note_app/global/data/colors.dart';
 import 'package:note_app/global/style/style_widget.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:note_app/model/category_model.dart';
+import 'package:note_app/model/note_model.dart';
+
+import '../../database/category_connection.dart';
 
 class AddNoteScreen extends StatefulWidget {
   const AddNoteScreen({Key? key}) : super(key: key);
@@ -23,8 +27,27 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     });
   }
 
+  List<CategoryModel> categorys = [];
+  getCategory() async {
+    await CategoryDB().getCategory().then((value) {
+      setState(() {
+        categorys = value;
+      });
+    });
+  }
+
+  TextEditingController titleController = TextEditingController();
+  TextEditingController bodyController = TextEditingController();
+
   TextEditingController selectColorController = TextEditingController();
   CategoryModel? categoryModel;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCategory();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +67,19 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
         title: const Text('Add Note'),
         actions: [
           TextButton(
-              onPressed: () {},
+              onPressed: () async {
+                if (bodyController.text.isNotEmpty ||
+                    titleController.text.isNotEmpty && categoryModel != null) {
+                  await NoteDB()
+                      .insertNote(NoteModel(
+                          id: DateTime.now().microsecondsSinceEpoch,
+                          title: titleController.text,
+                          category: categoryModel!.name.toString(),
+                          colorCode: selectColor,
+                          description: bodyController.text))
+                      .whenComplete(() => Navigator.pop(context));
+                }
+              },
               child: Text(
                 'Save',
                 style: TextStyle(color: Colors.white, fontSize: fontSizeS),
@@ -56,6 +91,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
+              controller: titleController,
               decoration: InputDecoration(
                   border: OutlineInputBorder(
                       gapPadding: 4, borderRadius: BorderRadius.circular(20)),
@@ -65,6 +101,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
+              controller: bodyController,
               maxLines: 8,
               decoration: InputDecoration(
                 border: OutlineInputBorder(

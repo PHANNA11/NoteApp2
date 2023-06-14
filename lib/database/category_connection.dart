@@ -33,6 +33,15 @@ class CategoryDB {
     return result.map((e) => CategoryModel.fromMap(e)).toList();
   }
 
-  Future<void> deleteCategoty() async {}
-  Future<void> updateCategory() async {}
+  Future<void> deleteCategoty(int categoryId) async {
+    var db = await initializeDatabase();
+    await db.delete(categoryTable,
+        where: '$category_id=?', whereArgs: [categoryId]);
+  }
+
+  Future<void> updateCategory(CategoryModel categoty) async {
+    var db = await initializeDatabase();
+    await db.update(categoryTable, categoty.toMap(),
+        where: '$category_id=?', whereArgs: [categoty.id]);
+  }
 }

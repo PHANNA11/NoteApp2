@@ -18,8 +18,3 @@ class CategoryModel {
       : id = res[category_id],
         name = res[category_name];
 }
-
-List<CategoryModel> categorys = [
-  CategoryModel(id: 1, name: 'Person'),
-  CategoryModel(id: 2, name: 'work')
-];

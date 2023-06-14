@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -89,14 +90,24 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   dismissible: null,
                   children: [
                     SlidableAction(
-                      onPressed: (context) {},
+                      onPressed: (context) async {
+                        await CategoryDB()
+                            .deleteCategoty(categoryList[index].id)
+                            .whenComplete(() => getCategoty());
+                      },
                       backgroundColor: const Color(0xFFFE4A49),
                       foregroundColor: Colors.white,
                       icon: Icons.delete,
                       label: 'Delete',
                     ),
                     SlidableAction(
-                      onPressed: (context) {},
+                      onPressed: (context) {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) =>
+                              buildDialog(categoryList[index]),
+                        );
+                      },
                       backgroundColor: const Color(0xFF21B7CA),
                       foregroundColor: Colors.white,
                       icon: Icons.edit_note_rounded,
@@ -112,6 +123,50 @@ class _CategoryScreenState extends State<CategoryScreen> {
           ),
         )
       ]),
+    );
+  }
+
+  Widget buildDialog(CategoryModel categoryModel) {
+    var categoryController = TextEditingController();
+
+    categoryController.text = categoryModel.name;
+
+    return SizedBox(
+      height: 400,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'Update Category',
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              controller: categoryController,
+              decoration: const InputDecoration(
+                  border: OutlineInputBorder(), hintText: 'category name'),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CupertinoButton(
+                color: Theme.of(context).primaryColor,
+                child: const Text('save'),
+                onPressed: () async {
+                  await CategoryDB()
+                      .updateCategory(CategoryModel(
+                          id: categoryModel.id, name: categoryController.text))
+                      .then((value) => Navigator.pop(context))
+                      .then((value) => getCategoty());
+                }),
+          )
+        ],
+      ),
     );
   }
 }
