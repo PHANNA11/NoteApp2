@@ -14,9 +14,9 @@ class DrawerScreen extends StatelessWidget {
       children: [
         buildCardWidget(context),
         const Divider(color: Colors.black, indent: 10),
-        buildCardWidget(context),
-        const Divider(color: Colors.black, indent: 10),
-        buildCardWidget(context),
+        // buildCardWidget(context),
+        // const Divider(color: Colors.black, indent: 10),
+        // buildCardWidget(context),
       ],
     ));
   }

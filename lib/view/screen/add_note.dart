@@ -12,8 +12,8 @@ import 'package:note_app/model/note_model.dart';
 import '../../database/category_connection.dart';
 
 class AddNoteScreen extends StatefulWidget {
-  const AddNoteScreen({Key? key}) : super(key: key);
-
+  AddNoteScreen({Key? key, this.noteUpdate}) : super(key: key);
+  NoteModel? noteUpdate;
   @override
   State<AddNoteScreen> createState() => _AddNoteScreenState();
 }
@@ -25,6 +25,23 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
     setState(() {
       selectColor = codeColor;
     });
+  }
+
+  getDataUpdateNote() async {
+    setState(() {
+      titleController.text = widget.noteUpdate!.title;
+      bodyController.text = widget.noteUpdate!.description;
+      selectColor = widget.noteUpdate!.colorCode;
+      categoryModel = categorys[categorys.indexWhere(
+          (element) => element.name == widget.noteUpdate!.category)];
+      selectCategoryntroller.text = widget.noteUpdate!.category;
+    });
+  }
+
+  clearData() {
+    titleController.text = '';
+    bodyController.text = '';
+    selectColor = '#1da2d8';
   }
 
   List<CategoryModel> categorys = [];
@@ -39,13 +56,18 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   TextEditingController titleController = TextEditingController();
   TextEditingController bodyController = TextEditingController();
 
-  TextEditingController selectColorController = TextEditingController();
+  TextEditingController selectCategoryntroller = TextEditingController();
   CategoryModel? categoryModel;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getCategory();
+    if (widget.noteUpdate != null) {
+      getDataUpdateNote();
+    } else {
+      clearData();
+    }
   }
 
   @override
@@ -64,20 +86,38 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                 style: TextStyle(color: Colors.white, fontSize: fontSizeS),
               ),
             )),
-        title: const Text('Add Note'),
+        title: widget.noteUpdate == null
+            ? const Text('Add Note')
+            : const Text('Edit Note'),
         actions: [
           TextButton(
               onPressed: () async {
-                if (bodyController.text.isNotEmpty ||
-                    titleController.text.isNotEmpty && categoryModel != null) {
-                  await NoteDB()
-                      .insertNote(NoteModel(
-                          id: DateTime.now().microsecondsSinceEpoch,
-                          title: titleController.text,
-                          category: categoryModel!.name.toString(),
-                          colorCode: selectColor,
-                          description: bodyController.text))
-                      .whenComplete(() => Navigator.pop(context));
+                if (widget.noteUpdate == null) {
+                  if (bodyController.text.isNotEmpty ||
+                      titleController.text.isNotEmpty &&
+                          categoryModel != null) {
+                    await NoteDB()
+                        .insertNote(NoteModel(
+                            id: DateTime.now().microsecondsSinceEpoch,
+                            title: titleController.text,
+                            category: categoryModel!.name.toString(),
+                            colorCode: selectColor,
+                            description: bodyController.text))
+                        .whenComplete(() => Navigator.pop(context));
+                  }
+                } else {
+                  if (bodyController.text.isNotEmpty ||
+                      titleController.text.isNotEmpty &&
+                          categoryModel != null) {
+                    await NoteDB()
+                        .updateNote(NoteModel(
+                            id: widget.noteUpdate!.id,
+                            title: titleController.text,
+                            category: categoryModel!.name.toString(),
+                            colorCode: selectColor,
+                            description: bodyController.text))
+                        .whenComplete(() => Navigator.pop(context));
+                  }
                 }
               },
               child: Text(
@@ -136,7 +176,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                       child: DropdownButton2<CategoryModel>(
                         isExpanded: true,
                         dropdownSearchData: DropdownSearchData(
-                          searchController: selectColorController,
+                          searchController: selectCategoryntroller,
                           searchInnerWidgetHeight: 50,
                           searchInnerWidget: Container(
                             height: 60,
@@ -149,7 +189,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                             child: TextFormField(
                               expands: true,
                               maxLines: null,
-                              controller: selectColorController,
+                              controller: selectCategoryntroller,
                               decoration: InputDecoration(
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(
@@ -173,7 +213,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                         ),
                         onMenuStateChange: (isOpen) {
                           if (!isOpen) {
-                            selectColorController.clear();
+                            selectCategoryntroller.clear();
                           }
                         },
                         hint: Row(
