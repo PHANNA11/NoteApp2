@@ -119,7 +119,6 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                         .whenComplete(() => Navigator.pop(context));
                   }
                 }
-                //=====
               },
               child: Text(
                 'Save',
